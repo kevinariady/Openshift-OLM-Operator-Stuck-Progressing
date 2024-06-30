@@ -1,0 +1,17 @@
+Issue
+Cluster operator operator-lifecycle-manager-packageserver is stuck in progressing state
+Certificate for cluster operator operator-lifecycle-manager-packageserver was expired
+
+Resolution
+Recreate the service secret associated with cluster operator operator-lifecycle-manager-packageserver:
+$ oc delete secret packageserver-service-cert -n openshift-operator-lifecycle-manager
+
+Check if the certificate is renewed:
+$ oc get secret packageserver-service-cert -o json -n openshift-operator-lifecycle-manager | jq -r '.data | .["tls.crt"]' | base64 -d | openssl x509 -noout -dates
+notBefore=Nov 20 22:41:18 2022 GMT
+notAfter=Nov 19 22:41:18 2024 GMT
+
+The cluster operator will report available now:
+$ oc get co operator-lifecycle-manager-packageserver
+NAME                                       VERSION   AVAILABLE   PROGRESSING   DEGRADED   SINCE
+operator-lifecycle-manager-packageserver   4.8.35    True        False         False      38m
